@@ -36,6 +36,7 @@
   <p>Hello world! This is HTML5 Boilerplate.</p>
   <div class="js-map map"></div>
   <div id="my_dataviz"></div>
+  <div id="some_data"></div>
 
 </body>
 <script src="js/vendor/modernizr-3.8.0.min.js"></script>
@@ -113,14 +114,25 @@
         .append("g")
         .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
+
     svg.append('image')
         .attr('xlink:href', 'img/sanhok.jpeg')
         .attr('width', width)
         .attr('height', height);
+
     //Read the data
-    d3.json("data/sampledata.json").then((data) => {
-        console.log(data);
+    /*
+    * First Trial:
+    *  - Plot the points where everyone left
+    *    - d.vehicle == "TransportAircraft" && d._T == "LogVehicleLeave"
+    *  - Plot the points where everyone landed
+    *    - d._T == "LogParachuteLanding"
+    *
+    * */
+    d3.json("data/sanhok_99c8a6a8-4baf-11ea-8202-46d7a2974ae9-telemetry.json").then((data) => {
+        // console.log(data);
         // Add X axis
+        let zones = [];
         var x = d3.scaleLinear()
             .domain([0, 408000])
             .range([ 0, width ]);
@@ -129,24 +141,69 @@
             .call(d3.axisBottom(x));
 
         // Add Y axis
+        // Reverse so that it matches the map coordinates
         var y = d3.scaleLinear()
             .domain([408000, 0])
             .range([ height, 0]);
         svg.append("g")
             .call(d3.axisLeft(y));
 
+        // LogVehicleLeave
         // Add dots
         svg.append('g')
             .selectAll("dot")
             .data(data)
             .enter()
             .append("circle")
-            .attr("cx", function (d) { if(d.character !== undefined ) {return x(d.character.location.x);} } )
-            .attr("cy", function (d) { if(d.character !== undefined ) {return y(d.character.location.y); } } )
+            .attr("cx", function (d) {
+                if(d.character !== undefined) {
+                    if(d.vehicle !== undefined && d.vehicle !== null && d.vehicle.vehicleType === "TransportAircraft" && d._T === "LogVehicleLeave") {
+                        return x(d.character.location.x);
+                    }
+                }
+            })
+            .attr("cy", function (d) {
+                if(d.character !== undefined) {
+                    if(d.vehicle !== undefined && d.vehicle !== null && d.vehicle.vehicleType === "TransportAircraft" && d._T === "LogVehicleLeave") {
+                        return x(d.character.location.y);
+                    }
+                }
+            })
             .attr("r", 2)
-            .style("fill", "#FF100B")
+            .style("fill", "#FF100B");
 
-    })
+        // LogParachuteLanding
+        // Add dots
+        svg.append('g')
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) {
+                if(d.character !== undefined) {
+                    if(d._T === "LogParachuteLanding") {
+                        zones.push(d.character.zone[0] === undefined ? "unknown" : d.character.zone[0]);
+                        return x(d.character.location.x);
+                    }
+                }
+            })
+            .attr("cy", function (d) {
+                if(d.character !== undefined) {
+                    if(d._T === "LogParachuteLanding") {
+                        return x(d.character.location.y);
+                    }
+                }
+            })
+            .attr("r", 2)
+            .style("fill", "#fffe00");
+        console.log(zones);
+        var map = zones.reduce(function(prev, cur) {
+            prev[cur] = (prev[cur] || 0) + 1;
+            return prev;
+        }, {});
+        
+        document.querySelector("#some_data").textContent =(JSON.stringify(map));
+    });
 
 </script>
 </html>
