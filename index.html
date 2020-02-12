@@ -1,0 +1,152 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+<style media="screen">
+  body {
+    margin: 0;
+  }
+
+  .supermarket {
+    fill: red;
+    stroke: #c00;
+  }
+</style>
+  <!--[if IE]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+  <![endif]-->
+
+  <!-- Add your site or application content here -->
+  <p>Hello world! This is HTML5 Boilerplate.</p>
+  <div class="js-map map"></div>
+  <div id="my_dataviz"></div>
+
+</body>
+<script src="js/vendor/modernizr-3.8.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="js/vendor/jquery-3.4.1.min.js"><\/script>')</script>
+<script src="js/plugins.js"></script>
+<script src="js/main.js"></script>
+
+<!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
+<script>
+    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+    ga('create', 'UA-XXXXX-Y', 'auto'); ga('set','transport','beacon'); ga('send', 'pageview')
+</script>
+<script src="https://www.google-analytics.com/analytics.js" async></script>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<script charset="utf-8">
+  // works for raster / geo lat/long
+    // var el = d3.select('.js-map'),
+    //     width = 1200 / 2,
+    //     height = 1200 / 2,
+    //     // Exported bounds of raster image
+    //     rasterBounds = [[-122.7895, 45.4394], [-122.5015, 45.6039]];
+    //
+    // var projection = d3.geoMercator()
+    //     .scale(1)
+    //     .translate([0, 0]);
+    //
+    // var path = d3.geoPath()
+    //     .projection(projection);
+    //
+    // var map = el.append('svg')
+    //     .attr('width', width)
+    //     .attr('height', height);
+    //
+    // map.append('image')
+    //     .attr('xlink:href', 'img/sanhok.jpeg')
+    //     .attr('width', width)
+    //     .attr('height', height);
+    //
+    // d3.json('data/supermarkets.json').then((data, err) => {
+    //     var b = [projection(rasterBounds[0]), projection(rasterBounds[1])],
+    //         s = 1 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+    //         t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2]
+    //
+    //     projection
+    //         .scale(s)
+    //         .translate(t);
+    //
+    //     map.selectAll('.supermarket')
+    //         .data(data.features)
+    //         .enter().append('circle')
+    //         .attr('class', 'supermarket')
+    //         .attr('r', 2)
+    //         .each(function(d) {
+    //             var lonlat = projection(d.geometry.coordinates);
+    //             d3.select(this)
+    //                 .attr('cx', lonlat[0])
+    //                 .attr('cy', lonlat[1])
+    //         })
+    // });
+
+</script>
+<script>
+
+    // set the dimensions and margins of the graph
+    var margin = {top: 50, right: 50, bottom: 50, left: 50},
+        width = 700 - margin.left - margin.right,
+        height = 700 - margin.top - margin.bottom;
+
+    // append the svg object to the body of the page
+    var svg = d3.select("#my_dataviz")
+        .append("svg")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+    svg.append('image')
+        .attr('xlink:href', 'img/sanhok.jpeg')
+        .attr('width', width)
+        .attr('height', height);
+    //Read the data
+    d3.json("data/sampledata.json").then((data) => {
+        console.log(data);
+        // Add X axis
+        var x = d3.scaleLinear()
+            .domain([0, 408000])
+            .range([ 0, width ]);
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(x));
+
+        // Add Y axis
+        var y = d3.scaleLinear()
+            .domain([408000, 0])
+            .range([ height, 0]);
+        svg.append("g")
+            .call(d3.axisLeft(y));
+
+        // Add dots
+        svg.append('g')
+            .selectAll("dot")
+            .data(data)
+            .enter()
+            .append("circle")
+            .attr("cx", function (d) { if(d.character !== undefined ) {return x(d.character.location.x);} } )
+            .attr("cy", function (d) { if(d.character !== undefined ) {return y(d.character.location.y); } } )
+            .attr("r", 2)
+            .style("fill", "#FF100B")
+
+    })
+
+</script>
+</html>
